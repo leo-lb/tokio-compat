@@ -29,7 +29,7 @@ blocking = [
     "tokio-02/blocking",
 ]
 futures-io = ["io", "futures-io-preview"]
-io = ["tokio-02/io", "pin-project"]
+io = ["tokio-02/io-util", "pin-project"]
 
 # enables the compat runtimes.
 rt-current-thread = [
