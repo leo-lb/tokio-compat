@@ -49,8 +49,7 @@
 //!     println!("10 ms have elapsed");
 //!
 //!     // Wait for a `tokio` 0.2 `Delay`...
-//!     let when = Instant::now() + Duration::from_millis(20);
-//!     tokio_02::timer::delay(when).await;
+//!     tokio_02::time::delay_for(Duration::from_millis(20)).await;
 //!     println!("20 ms have elapsed");
 //! });
 //! ```
@@ -60,6 +59,7 @@
 //! - `rt-current-thread`: enables the `current_thread` compatibilty runtime
 //! - `rt-full`: enables the `current_thread` and threadpool compatibility
 //!   runtimes (enabled by default)
+#![doc(html_root_url = "https://docs.rs/tokio-compat/0.1.2")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -72,8 +72,15 @@
     attr(deny(warnings, rust_2018_idioms), allow(dead_code, unused_variables))
 ))]
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 #[cfg(any(feature = "rt-current-thread", feature = "rt-full"))]
+#[cfg_attr(
+    docsrs,
+    doc(cfg(any(feature = "rt-current-thread", feature = "rt-full")))
+)]
 pub mod runtime;
+
 #[cfg(feature = "rt-full")]
 pub use self::runtime::{run, run_std};
 

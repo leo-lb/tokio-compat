@@ -67,14 +67,14 @@
 //! [rt]: struct.Runtime.html
 //! [concurrent-rt]: ../struct.Runtime.html
 //! [default-rt]:
-//!     https://docs.rs/tokio/0.2.0-alpha.6/tokio/runtime/current_thread/struct.Runtime.html
+//!     https://docs.rs/tokio/0.2.4/tokio/runtime/current_thread/struct.Runtime.html
 //! [chan]: https://docs.rs/futures/0.1/futures/sync/mpsc/fn.channel.html
 //! [reactor]: ../../reactor/struct.Reactor.html
 //! [executor]: https://tokio.rs/docs/internals/runtime-model/#executors
 //! [timer]: ../../timer/index.html
 //! [timer-01]: https://docs.rs/tokio/0.1.22/tokio/timer/index.html
 //! [reactor-01]: https://docs.rs/tokio/0.1.22/tokio/reactor/struct.Reactor.html
-use super::compat;
+use super::{compat, idle};
 
 mod builder;
 mod runtime;
@@ -85,7 +85,7 @@ pub use self::runtime::{Handle, RunError, Runtime};
 pub use self::task_executor::TaskExecutor;
 
 use futures_01::future::Future as Future01;
-use futures_util::{compat::Future01CompatExt, FutureExt};
+use futures_util::compat::Future01CompatExt;
 use std::future::Future;
 
 /// Run the provided `futures` 0.1 future to completion using a runtime running on the current thread.
@@ -93,6 +93,7 @@ use std::future::Future;
 /// This first creates a new [`Runtime`], and calls [`Runtime::block_on`] with the provided future,
 /// which blocks the current thread until the provided future completes. It then calls
 /// [`Runtime::run`] to wait for any other spawned futures to resolve.
+#[cfg_attr(docsrs, doc(cfg(feature = "rt-current-thread")))]
 pub fn block_on_all<F>(future: F) -> Result<F::Item, F::Error>
 where
     F: Future01,
@@ -105,6 +106,7 @@ where
 /// This first creates a new [`Runtime`], and calls [`Runtime::block_on`] with the provided future,
 /// which blocks the current thread until the provided future completes. It then calls
 /// [`Runtime::run`] to wait for any other spawned futures to resolve.
+#[cfg_attr(docsrs, doc(cfg(feature = "rt-current-thread")))]
 pub fn block_on_all_std<F>(future: F) -> F::Output
 where
     F: Future,
@@ -120,11 +122,14 @@ where
 /// # Panics
 ///
 /// This function panics if called from the context of an executor.
+#[cfg_attr(docsrs, doc(cfg(feature = "rt-current-thread")))]
 pub fn run<F>(future: F)
 where
     F: Future01<Item = (), Error = ()> + 'static,
 {
-    run_std(future.compat().map(|_| ()))
+    let mut r = Runtime::new().expect("failed to start runtime on current thread");
+    r.spawn(future);
+    r.run().expect("failed to resolve remaining futures");
 }
 
 /// Start a current-thread runtime using the supplied `std::future` ture to bootstrap execution.
@@ -132,14 +137,12 @@ where
 /// # Panics
 ///
 /// This function panics if called from the context of an executor.
+#[cfg_attr(docsrs, doc(cfg(feature = "rt-current-thread")))]
 pub fn run_std<F>(future: F)
 where
     F: Future<Output = ()> + 'static,
 {
     let mut r = Runtime::new().expect("failed to start runtime on current thread");
-    r.spawn_std(future);
+    r.block_on_std(future);
     r.run().expect("failed to resolve remaining futures");
 }
-
-#[cfg(test)]
-mod tests;
