@@ -28,7 +28,7 @@ blocking = [
     "rt-current-thread",
     "tokio-02/blocking",
 ]
-futures-io = ["io", "futures-io-preview"]
+futures-io = ["io", "futures-io"]
 io = ["tokio-02/io-util", "pin-project"]
 
 # enables the compat runtimes.
@@ -59,7 +59,7 @@ tokio-02 = { package = "tokio", version = "0.2.4", default-features = false }
 pin-project-lite = { version = "0.1", optional = true }
 
 # io
-futures-io-preview = { version = "0.3.0-alpha.19", optional = true }
+futures-io = { version = "0.3.1", optional = true }
 pin-project = { version = "0.4", optional = true }
 
 # runtime-only
