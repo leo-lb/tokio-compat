@@ -55,7 +55,7 @@ sink = ["futures-util/sink"]
 futures-01 = { package = "futures", version = "0.1" }
 futures-03-core = { package = "futures-core", version = "0.3.1" }
 futures-util = { version = "0.3.1", default-features = false, features = ["compat"] }
-tokio-02 = { package = "tokio", version = "0.2.4", default-features = false }
+tokio-02 = { package = "tokio", version = "0.2.9", default-features = false }
 pin-project-lite = { version = "0.1", optional = true }
 
 # io
